@@ -1,7 +1,7 @@
 "use client";
 
 import { Job } from "@/lib/types";
-import { formatDuration, getStagLabel, statusBgColor } from "@/lib/utils";
+import { formatDuration, getStagLabel, statusBgColor, statusColor } from "@/lib/utils";
 import ProgressBar from "./ProgressBar";
 
 const PIPELINE_STAGES = [
@@ -18,7 +18,10 @@ const PIPELINE_STAGES = [
 
 function stageIndex(stage: string | null): number {
   if (!stage) return -1;
-  const normalised = stage.startsWith("clip_") ? "generating_clips" : stage;
+  const normalised = stage.startsWith("clip_")
+    ? "adding_subtitles"
+    : stage;
+
   return PIPELINE_STAGES.findIndex((s) => s.key === normalised);
 }
 
@@ -31,6 +34,7 @@ export default function ProcessingCard({ job }: ProcessingCardProps) {
 
   return (
     <div className="card p-6 space-y-6">
+
       {/* Header */}
       <div className="flex items-start gap-4">
         {job.video_thumbnail && (
@@ -42,25 +46,45 @@ export default function ProcessingCard({ job }: ProcessingCardProps) {
             />
           </div>
         )}
+
         <div className="flex-1 min-w-0">
-          <h2 className="font-bold text-base leading-snug" style={{ color: "var(--text-primary)" }}>
+          <h2
+            className="font-bold text-base leading-snug"
+            style={{ color: "var(--text-primary)" }}
+          >
             {job.video_title || "Processing video..."}
           </h2>
+
           {job.video_duration && (
-            <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>
+            <p
+              className="text-sm mt-0.5"
+              style={{ color: "var(--text-secondary)" }}
+            >
               {job.channel_name && `${job.channel_name} · `}
               {formatDuration(job.video_duration)}
             </p>
           )}
+
           <div className="mt-2">
             <span
               className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border font-medium"
-              style={statusBgColor(job.status) as React.CSSProperties}
+              style={{
+                background: statusBgColor(job.status),
+                color: statusColor(job.status),
+                borderColor: statusColor(job.status) + "40",
+              }}
             >
-              {job.status !== "completed" && job.status !== "failed" && (
-                <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-              )}
-              {job.status === "completed" ? "✓ " : job.status === "failed" ? "✕ " : ""}
+              {job.status !== "completed" &&
+                job.status !== "failed" && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+                )}
+
+              {job.status === "completed"
+                ? "✓ "
+                : job.status === "failed"
+                ? "✕ "
+                : ""}
+
               {getStagLabel(job.stage)}
             </span>
           </div>
@@ -79,13 +103,26 @@ export default function ProcessingCard({ job }: ProcessingCardProps) {
       {job.status === "failed" && job.error_message && (
         <div
           className="rounded-xl p-4"
-          style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.3)" }}
+          style={{
+            background: "rgba(239, 68, 68, 0.1)",
+            border: "1px solid rgba(239, 68, 68, 0.3)",
+          }}
         >
           <div className="flex items-start gap-2">
             <span style={{ color: "#ef4444" }}>⚠</span>
+
             <div>
-              <p className="text-sm font-semibold" style={{ color: "#ef4444" }}>Processing Failed</p>
-              <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
+              <p
+                className="text-sm font-semibold"
+                style={{ color: "#ef4444" }}
+              >
+                Processing Failed
+              </p>
+
+              <p
+                className="text-sm mt-1"
+                style={{ color: "var(--text-secondary)" }}
+              >
                 {job.error_message}
               </p>
             </div>
@@ -96,15 +133,22 @@ export default function ProcessingCard({ job }: ProcessingCardProps) {
       {/* Stage checklist */}
       <div className="space-y-2">
         {PIPELINE_STAGES.map((stage, idx) => {
-          const isDone = idx < currentIdx || (job.status === "completed");
-          const isActive = idx === currentIdx && job.status !== "completed";
-          const isPending = idx > currentIdx && job.status !== "completed";
+          const isDone =
+            idx < currentIdx || job.status === "completed";
+
+          const isActive =
+            idx === currentIdx && job.status !== "completed";
+
+          const isPending =
+            idx > currentIdx && job.status !== "completed";
 
           return (
             <div
               key={stage.key}
               className="flex items-center gap-3"
-              style={{ opacity: isPending ? 0.4 : 1 }}
+              style={{
+                opacity: isPending ? 0.4 : 1,
+              }}
             >
               <div
                 className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
@@ -114,6 +158,7 @@ export default function ProcessingCard({ job }: ProcessingCardProps) {
                     : isActive
                     ? "rgba(124, 58, 237, 0.2)"
                     : "var(--bg-secondary)",
+
                   border: isActive
                     ? "2px solid #7c3aed"
                     : isDone
@@ -122,13 +167,27 @@ export default function ProcessingCard({ job }: ProcessingCardProps) {
                 }}
               >
                 {isDone ? (
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="3"
+                  >
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 ) : isActive ? (
-                  <div className="w-2 h-2 rounded-full" style={{ background: "#8b5cf6", animation: "pulse 1s infinite" }} />
+                  <div
+                    className="w-2 h-2 rounded-full"
+                    style={{
+                      background: "#8b5cf6",
+                      animation: "pulse 1s infinite",
+                    }}
+                  />
                 ) : null}
               </div>
+
               <span
                 className="text-sm"
                 style={{
@@ -137,6 +196,7 @@ export default function ProcessingCard({ job }: ProcessingCardProps) {
                     : isActive
                     ? "#c4b5fd"
                     : "var(--text-muted)",
+
                   fontWeight: isActive ? 600 : 400,
                 }}
               >

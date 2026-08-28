@@ -51,7 +51,7 @@ def _find_binary(name: str) -> Optional[str]:
 
 def ffmpeg_path() -> str:
     """Find ffmpeg binary; raise if missing."""
-    path = shutil.which("ffmpeg")
+    path = _find_binary("ffmpeg")
     if not path:
         raise RuntimeError(
             "FFmpeg not found. Install FFmpeg and ensure it is on your PATH."
@@ -60,7 +60,7 @@ def ffmpeg_path() -> str:
 
 
 def ffprobe_path() -> str:
-    path = shutil.which("ffprobe")
+    path = _find_binary("ffprobe")
     if not path:
         raise RuntimeError("FFprobe not found. Install FFmpeg (includes ffprobe).")
     return path

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { listJobs, deleteJob } from "@/lib/api";
 import { Job } from "@/lib/types";
-import { formatDuration, timeAgo, statusBgColor, STATUS_LABELS } from "@/lib/utils";
+import { formatDuration, timeAgo, statusBgColor, statusColor, STATUS_LABELS } from "@/lib/utils";
 import EmptyState from "@/components/EmptyState";
 import { toast } from "@/components/Toast";
 
@@ -147,7 +147,11 @@ export default function JobsPage() {
                   <div className="flex items-center flex-wrap gap-3 mt-1.5">
                     <span
                       className="inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full border font-medium"
-                      style={statusBgColor(job.status) as React.CSSProperties}
+                      style={{
+                        background: statusBgColor(job.status),
+                        color: statusColor(job.status),
+                        borderColor: statusColor(job.status) + "40",
+                      }}
                     >
                       {job.status !== "completed" && job.status !== "failed" && (
                         <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />

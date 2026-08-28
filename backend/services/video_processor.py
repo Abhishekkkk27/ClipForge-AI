@@ -66,10 +66,13 @@ def process_clip(
     duration = clip.end_time - clip.start_time
     crop_filter = _build_crop_filter(src_w, src_h, output_width, output_height)
 
-    # Escape ASS path for Windows (backslashes → forward slashes)
-    ass_path_escaped = str(subtitle_path).replace("\\", "/").replace(":", "\\:")
-
-    filter_complex = f"{crop_filter},scale={output_width}:{output_height}:flags=lanczos,ass='{ass_path_escaped}'"
+    # Escape ASS path for FFmpeg filter (use relative path to avoid drive letter colon issues on Windows)
+    try:
+        rel_sub = str(subtitle_path.relative_to(Path.cwd())).replace("\\", "/")
+        filter_complex = f"{crop_filter},scale={output_width}:{output_height}:flags=lanczos,ass='{rel_sub}'"
+    except Exception:
+        ass_path_escaped = str(subtitle_path).replace("\\", "/").replace(":", "\\:")
+        filter_complex = f"{crop_filter},scale={output_width}:{output_height}:flags=lanczos,ass='{ass_path_escaped}'"
 
     # ── Run FFmpeg ─────────────────────────────────────────────────────────────
     run_ffmpeg([

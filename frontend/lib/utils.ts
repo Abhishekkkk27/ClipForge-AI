@@ -59,22 +59,22 @@ export function getStagLabel(stage: string | null): string {
   return stage.replace(/_/g, " ");
 }
 
-/** Map job status to color classes */
+/** Map job status to color */
 export function statusColor(status: JobStatus): string {
   switch (status) {
-    case "completed": return "text-emerald-400";
-    case "failed": return "text-red-400";
-    case "queued": return "text-zinc-400";
-    default: return "text-violet-400";
+    case "completed": return "#10b981";
+    case "failed": return "#ef4444";
+    case "queued": return "#a1a1aa";
+    default: return "#c4b5fd";
   }
 }
 
 export function statusBgColor(status: JobStatus): string {
   switch (status) {
-    case "completed": return "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
-    case "failed": return "bg-red-500/15 text-red-400 border-red-500/30";
-    case "queued": return "bg-zinc-500/15 text-zinc-400 border-zinc-500/30";
-    default: return "bg-violet-500/15 text-violet-400 border-violet-500/30";
+    case "completed": return "rgba(16, 185, 129, 0.15)";
+    case "failed": return "rgba(239, 68, 68, 0.15)";
+    case "queued": return "rgba(113, 113, 122, 0.15)";
+    default: return "rgba(124, 58, 237, 0.15)";
   }
 }
 

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Clip } from "@/lib/types";
 import { formatDuration, formatTime, scoreColor } from "@/lib/utils";
-import { getClipPreviewUrl, getClipDownloadUrl } from "@/lib/api";
+import { getClipPreviewUrl, getClipDownloadUrl, getThumbnailUrl } from "@/lib/api";
 import { toast } from "@/components/Toast";
 
 interface ClipCardProps {
@@ -18,7 +18,7 @@ export default function ClipCard({ clip, onDelete }: ClipCardProps) {
 
   const score = clip.score ?? 0;
   const scoreColorClass = scoreColor(score);
-  const thumbnailUrl = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/clips/${clip.id}/thumbnail`;
+  const thumbnailUrl = getThumbnailUrl(clip.id);
   const previewUrl = getClipPreviewUrl(clip.id);
   const downloadUrl = getClipDownloadUrl(clip.id);
 
