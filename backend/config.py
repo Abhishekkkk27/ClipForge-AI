@@ -24,7 +24,7 @@ JOBS_DIR = DATA_DIR / "jobs"
 LOGS_DIR = DATA_DIR / "logs"
 
 # ─── Server ───────────────────────────────────────────────────────────────────
-BACKEND_PORT = int(os.getenv("BACKEND_PORT", "8000"))
+BACKEND_PORT = int(os.getenv("PORT", os.getenv("BACKEND_PORT", "8000")))
 FRONTEND_PORT = int(os.getenv("FRONTEND_PORT", "3000"))
 FRONTEND_URL = os.getenv("FRONTEND_URL", f"http://localhost:{FRONTEND_PORT}")
 
@@ -82,6 +82,10 @@ def get_youtube_cookies_path() -> Optional[Path]:
             pass
 
     if cookie_content:
+        # Handle string where linebreaks were literal \n and tabs were \t
+        if "\\n" in cookie_content and "\n" not in cookie_content:
+            cookie_content = cookie_content.replace("\\n", "\n").replace("\\t", "\t")
+
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         target = DATA_DIR / "cookies.txt"
         try:
