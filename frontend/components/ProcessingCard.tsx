@@ -102,29 +102,47 @@ export default function ProcessingCard({ job }: ProcessingCardProps) {
       {/* Error message */}
       {job.status === "failed" && job.error_message && (
         <div
-          className="rounded-xl p-4"
+          className="rounded-xl p-4 space-y-3"
           style={{
-            background: "rgba(239, 68, 68, 0.1)",
+            background: "rgba(239, 68, 68, 0.08)",
             border: "1px solid rgba(239, 68, 68, 0.3)",
           }}
         >
-          <div className="flex items-start gap-2">
-            <span style={{ color: "#ef4444" }}>⚠</span>
+          <div className="flex items-start gap-2.5">
+            <span className="text-base" style={{ color: "#ef4444" }}>⚠</span>
 
-            <div>
+            <div className="flex-1">
               <p
                 className="text-sm font-semibold"
                 style={{ color: "#ef4444" }}
               >
-                Processing Failed
+                {job.error_message.includes("authentication") || job.error_message.includes("cookies") || job.error_message.includes("bot detection")
+                  ? "YouTube Authentication Required"
+                  : "Processing Failed"}
               </p>
 
               <p
-                className="text-sm mt-1"
+                className="text-sm mt-1 leading-relaxed"
                 style={{ color: "var(--text-secondary)" }}
               >
                 {job.error_message}
               </p>
+
+              {(job.error_message.includes("cookies") || job.error_message.includes("authentication") || job.error_message.includes("bot detection")) && (
+                <div
+                  className="mt-3 p-3 rounded-lg text-xs"
+                  style={{
+                    background: "rgba(124, 58, 237, 0.1)",
+                    border: "1px solid rgba(124, 58, 237, 0.3)",
+                    color: "#c4b5fd",
+                  }}
+                >
+                  <p className="font-semibold mb-1">💡 How to fix:</p>
+                  <p className="leading-relaxed">
+                    Set <code className="px-1 py-0.5 rounded bg-black/40 text-violet-300">YOUTUBE_COOKIES_FILE</code> or <code className="px-1 py-0.5 rounded bg-black/40 text-violet-300">YOUTUBE_COOKIES_TEXT</code> in your Render/backend environment settings, or try another public video.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

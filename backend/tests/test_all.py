@@ -262,3 +262,61 @@ class TestAPI:
     def test_get_nonexistent_job(self):
         resp = client.get("/api/jobs/nonexistent-id")
         assert resp.status_code == 404
+
+
+# ─── YouTube Error Parsing & Cookies Tests ────────────────────────────────────
+
+from backend.services.youtube import parse_youtube_error, get_ytdlp_base_args
+from backend import config
+
+
+class TestYouTubeHelpers:
+    def test_parse_bot_detection_error(self):
+        err = "ERROR: Sign in to confirm you’re not a bot. This helps protect our community."
+        msg = parse_youtube_error(err)
+        assert "bot detection" in msg or "authentication" in msg
+        assert "cookies" in msg.lower()
+
+    def test_parse_age_restriction_error(self):
+        err = "ERROR: Sign in to confirm your age. This video may be inappropriate for some users."
+        msg = parse_youtube_error(err)
+        assert "authentication" in msg.lower() or "age" in msg.lower()
+        assert "cookies" in msg.lower()
+
+    def test_parse_private_video_error(self):
+        err = "ERROR: [youtube] dQw4w9WgXcQ: Private video. Sign in if you've been granted access."
+        msg = parse_youtube_error(err)
+        assert "private" in msg.lower()
+
+    def test_parse_unavailable_video_error(self):
+        err = "ERROR: [youtube] dQw4w9WgXcQ: Video unavailable. This video is not available"
+        msg = parse_youtube_error(err)
+        assert "unavailable" in msg.lower() or "removed" in msg.lower()
+
+    def test_parse_geo_restriction_error(self):
+        err = "ERROR: The uploader has not made this video available in your country"
+        msg = parse_youtube_error(err)
+        assert "region" in msg.lower() or "geographic" in msg.lower() or "country" in msg.lower()
+
+    def test_parse_members_only_error(self):
+        err = "ERROR: Join this channel to get access to members-only content"
+        msg = parse_youtube_error(err)
+        assert "members" in msg.lower()
+
+    def test_ytdlp_base_args_structure(self):
+        args = get_ytdlp_base_args()
+        assert args[0] == "yt-dlp"
+        assert "--extractor-args" in args
+        assert "--socket-timeout" in args
+        assert "--retries" in args
+        assert "--geo-bypass" in args
+
+    def test_cookies_text_env_resolution(self, tmp_path, monkeypatch):
+        test_cookie_data = "# Netscape HTTP Cookie File\n.youtube.com\tTRUE\t/\tTRUE\t0\tTEST\tVALUE"
+        monkeypatch.setattr(config, "DATA_DIR", tmp_path)
+        monkeypatch.setattr(config, "YOUTUBE_COOKIES_TEXT", test_cookie_data)
+        cookie_path = config.get_youtube_cookies_path()
+        assert cookie_path is not None
+        assert cookie_path.is_file()
+        assert cookie_path.read_text(encoding="utf-8") == test_cookie_data
+

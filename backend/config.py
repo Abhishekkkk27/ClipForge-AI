@@ -5,6 +5,7 @@ Loads settings from environment variables with sensible defaults.
 
 import os
 from pathlib import Path
+from typing import Optional
 from dotenv import load_dotenv
 
 # Load .env file if present
@@ -47,8 +48,64 @@ DEFAULT_ASPECT_RATIO = os.getenv("DEFAULT_ASPECT_RATIO", "9:16")
 VIDEO_FORMAT = os.getenv("VIDEO_FORMAT", "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]/best[height<=720]")
 MAX_VIDEO_DURATION = int(os.getenv("MAX_VIDEO_DURATION", "3600"))  # 1 hour max
 
-# ─── Processing ───────────────────────────────────────────────────────────────
-MAX_CONCURRENT_JOBS = int(os.getenv("MAX_CONCURRENT_JOBS", "2"))
+# ─── YouTube Cookies & Authentication ───────────────────────────────────────────
+YOUTUBE_COOKIES_FILE = os.getenv("YOUTUBE_COOKIES_FILE")
+YOUTUBE_COOKIES_TEXT = os.getenv("YOUTUBE_COOKIES_TEXT")
+YOUTUBE_COOKIES_BASE64 = os.getenv("YOUTUBE_COOKIES_BASE64")
+
+def get_youtube_cookies_path() -> Optional[Path]:
+    """
+    Resolve the YouTube cookies file path safely without logging or exposing contents.
+    Order of precedence:
+      1. Explicit YOUTUBE_COOKIES_FILE environment variable (if file exists).
+      2. YOUTUBE_COOKIES_TEXT or YOUTUBE_COOKIES_BASE64 (written to data/cookies.txt).
+      3. Render secret file mount (/etc/secrets/cookies.txt).
+      4. Local cookies.txt in DATA_DIR or project root.
+    Returns Path if a valid cookie file exists, otherwise None.
+    """
+    import base64
+
+    # 1. Explicit file path
+    if YOUTUBE_COOKIES_FILE:
+        p = Path(YOUTUBE_COOKIES_FILE)
+        if p.is_file() and p.stat().st_size > 0:
+            return p
+
+    # 2. Raw or Base64 cookie string from environment
+    cookie_content = None
+    if YOUTUBE_COOKIES_TEXT and YOUTUBE_COOKIES_TEXT.strip():
+        cookie_content = YOUTUBE_COOKIES_TEXT.strip()
+    elif YOUTUBE_COOKIES_BASE64 and YOUTUBE_COOKIES_BASE64.strip():
+        try:
+            cookie_content = base64.b64decode(YOUTUBE_COOKIES_BASE64.strip()).decode("utf-8", errors="replace")
+        except Exception:
+            pass
+
+    if cookie_content:
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        target = DATA_DIR / "cookies.txt"
+        try:
+            target.write_text(cookie_content, encoding="utf-8")
+            try:
+                # Set permissions to 0600 on POSIX platforms
+                target.chmod(0o600)
+            except Exception:
+                pass
+            return target
+        except Exception:
+            pass
+
+    # 3. Render secret files default mount path
+    render_secret = Path("/etc/secrets/cookies.txt")
+    if render_secret.is_file() and render_secret.stat().st_size > 0:
+        return render_secret
+
+    # 4. Local cookies.txt in DATA_DIR or root
+    for candidate in [DATA_DIR / "cookies.txt", BASE_DIR / "cookies.txt"]:
+        if candidate.is_file() and candidate.stat().st_size > 0:
+            return candidate
+
+    return None
 
 # ─── Ensure directories exist ─────────────────────────────────────────────────
 def ensure_directories():

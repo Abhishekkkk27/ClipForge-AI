@@ -45,6 +45,15 @@ frontend/.env.*.local
 *.pem
 *.key
 
+# YouTube Cookies & Secrets
+cookies.txt
+*.cookies
+*.cookies.txt
+youtube_cookies.txt
+data/cookies.txt
+secrets/
+.secrets/
+
 # IDE & OS
 .DS_Store
 Thumbs.db

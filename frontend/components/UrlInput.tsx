@@ -60,6 +60,8 @@ export default function UrlInput({ showSettings = true, onJobCreated }: UrlInput
 
       if (metaRes.success && metaRes.data) {
         setMetadata(metaRes.data);
+      } else if (!metaRes.success && metaRes.error?.message) {
+        setUrlError(metaRes.error.message);
       }
     }, 600);
   };
