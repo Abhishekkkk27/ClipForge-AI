@@ -211,6 +211,8 @@ def _run_pipeline(
             job = db.query(Job).filter(Job.id == job_id).first()
             if job:
                 job.status = "failed"
+                job.stage = "failed"
+                job.progress = 0
                 job.error_message = str(e)
                 job.updated_at = datetime.utcnow()
                 db.commit()
