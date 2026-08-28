@@ -1,0 +1,29 @@
+# ClipForge AI — Python Dependencies
+# Install: pip install -r requirements.txt
+
+# ── Web Framework ──────────────────────────────────────────────────────────────
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+
+# ── Database ───────────────────────────────────────────────────────────────────
+sqlalchemy>=2.0.0
+aiosqlite>=0.20.0
+
+# ── Data Validation ────────────────────────────────────────────────────────────
+pydantic>=2.5.0
+pydantic-settings>=2.2.0
+python-multipart>=0.0.9
+
+# ── YouTube Download ───────────────────────────────────────────────────────────
+yt-dlp>=2024.1.1
+
+# ── Speech Recognition ─────────────────────────────────────────────────────────
+# faster-whisper needs ctranslate2. Install with --only-binary if build fails.
+faster-whisper>=1.0.0
+
+# ── Environment ────────────────────────────────────────────────────────────────
+python-dotenv>=1.0.0
+
+# ── Testing ────────────────────────────────────────────────────────────────────
+pytest>=8.0.0
+httpx>=0.27.0
